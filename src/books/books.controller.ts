@@ -49,6 +49,21 @@ export class BooksController {
     }
   }
 
+  @Get()
+  async getAllBooks(): Promise<APIResponse<Book[]>> {
+    const bookData = await this.booksService.getAllBook();
+    if(bookData !== null) {
+      return {
+        message: 'Books found',
+        data: bookData,
+      }
+    } else {
+      return {
+        error: 'No books found',
+      }
+    }
+  }
+
   @Put(':id')
   async updateBook(
     @Param('id') id: number,

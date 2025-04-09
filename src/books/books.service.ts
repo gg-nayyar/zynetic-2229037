@@ -31,7 +31,7 @@ export class BooksService {
     return bookData;
   }
 
-  async getAllBookById(): Promise<Book[] | null> {
+  async getAllBook(): Promise<Book[] | null> {
     const bookData = await this.prisma.book.findMany();
     if(bookData) {
       return bookData;
