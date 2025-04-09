@@ -1,17 +1,20 @@
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma.service';
 import * as bcrypt from 'bcrypt';
+import { Injectable } from '@nestjs/common';
 
 interface User {
   email: string;
   password: string;
 }
 
+@Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private prisma: PrismaService,
-  ) {}
+  ) {
+  }
   async signup(data: User): Promise<{ access_token: string }> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
@@ -23,7 +26,11 @@ export class AuthService {
         },
       });
       return this.signToken(user.id, user.email);
-    } catch {
+    } catch(e) {
+      if (e instanceof Error && e.message.includes('Unique constraint failed')) {
+        throw new Error('User already exists');
+      }
+      console.error('Error creating user:', e);
       throw new Error('User already exists');
     }
   }

@@ -10,7 +10,9 @@ export class SignInMiddleware implements NestMiddleware {
     private prisma: PrismaService,
   ) {}
   async use(req: Request, res: Response, next: NextFunction) {
-    const token = req.headers['authorization'];
+    console.log("MIDDLEWARE RUNNING");
+    const token = req.headers['authorization']?.split(' ')[1];
+    console.log(token);
     if (!token) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -27,11 +29,10 @@ export class SignInMiddleware implements NestMiddleware {
             return res.status(401).json({ error: 'Unauthorized' });
         }
         res.locals.user = user;
-        next();
+        return next();
     } catch {
         return res.status(401).json({ error: 'Invalid token' });
     }
-    next();
   }
 }
 

@@ -19,9 +19,16 @@ export class AuthController {
         message: 'User created successfully',
         data: data,
       };
-    } catch {
+    } catch (error: unknown) {
+      console.error('Signup error:', error);
+  
+      if (error instanceof Error && error.message === 'User already exists') {
+        return {
+          error: 'User already exists',
+        };
+      }
       return {
-        error: 'User already exists',
+        error: 'An unexpected error occurred. Please try again later.',
       };
     }
   }

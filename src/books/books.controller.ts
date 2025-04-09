@@ -52,6 +52,7 @@ export class BooksController {
 
   @Get()
   async getAllBooks(@Query('filter') query: string | null, @Query('by') field: Filter | null, @Query('page') page: number | null, @Query('limit') limit: number | null, @Query('sort') sort: Sort | null): Promise<APIResponse<Book[]>> {
+    console.log('Query:', query);
     const pagination: Pagination = {};
     if(page && limit) {
       pagination.pageNumber = Number(page);
@@ -66,11 +67,11 @@ export class BooksController {
             message: 'Books found',
             data: filteredBookData,
           }
-        } else {
-          return {
-            error: 'No books found',
-          }
         }
+        return {
+          error: 'No books found',
+        }
+      
       } else {
         const filteredBookData = await this.booksService.getAllBookWithFilter(query, Filter.title, pagination || null, sort || undefined);
         if(filteredBookData !== null) {
@@ -78,33 +79,33 @@ export class BooksController {
             message: 'Books found',
             data: filteredBookData,
           }
-        } else {
-          return {
-            error: 'No books found',
-          }
         }
-      }
-    } else {
-      const bookData = await this.booksService.getAllBook(pagination || null, sort || undefined);
-      if(bookData !== null) {
-        return {
-          message: 'Books found',
-          data: bookData,
-        }
-      } else {
         return {
           error: 'No books found',
         }
       }
     }
-
+    const bookData = await this.booksService.getAllBook(pagination || null, sort || undefined);
+    if(bookData !== null) {
+      console.log("wow")
+      return {
+        message: 'Books found',
+        data: bookData,
+      }
+    }
+    console.log("wow2")
+    return {
+      error: 'No books found',
+    }
   }
 
   @Put(':id')
   async updateBook(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() bookData: Book,
   ): Promise<APIResponse<Book>> {
+    console.log("hwwwwwwwww",id)
+    // const Id = parseInt(id);
     const udpatedBookData = await this.booksService.updateBook(id, bookData);
     if(udpatedBookData !== null) {
       return {
