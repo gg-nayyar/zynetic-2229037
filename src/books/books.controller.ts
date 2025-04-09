@@ -6,9 +6,11 @@ import {
   Delete,
   Param,
   Body,
+  Query,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { APIResponse } from 'types/api';
+import { Filter, Pagination, Sort } from 'types/book.types';
 
 interface Book {
   id?: string;
@@ -35,7 +37,6 @@ export class BooksController {
   }
   @Get(':id')
   async getBookById(@Param('id') id: number): Promise<APIResponse<Book>> {
-
     const bookData = await this.booksService.getBookById(id);
     if(bookData !== null) {
       return {
@@ -50,18 +51,53 @@ export class BooksController {
   }
 
   @Get()
-  async getAllBooks(): Promise<APIResponse<Book[]>> {
-    const bookData = await this.booksService.getAllBook();
-    if(bookData !== null) {
-      return {
-        message: 'Books found',
-        data: bookData,
+  async getAllBooks(@Query('filter') query: string | null, @Query('by') field: Filter | null, @Query('page') page: number | null, @Query('limit') limit: number | null, @Query('sort') sort: Sort | null): Promise<APIResponse<Book[]>> {
+    const pagination: Pagination = {};
+    if(page && limit) {
+      pagination.pageNumber = Number(page);
+      pagination.limitNumber = Number(limit);
+      pagination.startIndex = (pagination.pageNumber - 1) * pagination.limitNumber;
+    }
+    if(query) {
+      if(field) {
+        const filteredBookData = await this.booksService.getAllBookWithFilter(query, field, pagination || null, sort || undefined);
+        if(filteredBookData !== null) {
+          return {
+            message: 'Books found',
+            data: filteredBookData,
+          }
+        } else {
+          return {
+            error: 'No books found',
+          }
+        }
+      } else {
+        const filteredBookData = await this.booksService.getAllBookWithFilter(query, Filter.title, pagination || null, sort || undefined);
+        if(filteredBookData !== null) {
+          return {
+            message: 'Books found',
+            data: filteredBookData,
+          }
+        } else {
+          return {
+            error: 'No books found',
+          }
+        }
       }
     } else {
-      return {
-        error: 'No books found',
+      const bookData = await this.booksService.getAllBook(pagination || null, sort || undefined);
+      if(bookData !== null) {
+        return {
+          message: 'Books found',
+          data: bookData,
+        }
+      } else {
+        return {
+          error: 'No books found',
+        }
       }
     }
+
   }
 
   @Put(':id')
